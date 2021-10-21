@@ -32,8 +32,8 @@ CREATE TABLE ksiegowosc.godziny
     CONSTRAINT godziny_pkey PRIMARY KEY (id_godziny),
     CONSTRAINT id_pracownika FOREIGN KEY (id_pracownika)
         REFERENCES ksiegowosc.pracownicy (id_pracownika) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 )
 	
 CREATE TABLE ksiegowosc.pensja
@@ -63,20 +63,20 @@ CREATE TABLE ksiegowosc.wynagrodzenie
     CONSTRAINT wynagrodzenie_pkey PRIMARY KEY (id_wynagrodzenia),
     CONSTRAINT id_godziny FOREIGN KEY (id_godziny)
         REFERENCES ksiegowosc.godziny (id_godziny) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
     CONSTRAINT id_pensji FOREIGN KEY (id_pensji)
         REFERENCES ksiegowosc.pensja (id_pensji) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
     CONSTRAINT id_pracownika FOREIGN KEY (id_pracownika)
         REFERENCES ksiegowosc.pracownicy (id_pracownika) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
     CONSTRAINT id_premii FOREIGN KEY (id_premii)
         REFERENCES ksiegowosc.premia (id_premii) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 )
 
 /*5*/
@@ -99,12 +99,12 @@ INSERT INTO ksiegowosc.pensja (id_pensji, stanowisko, kwota) VALUES
 (20, 'zawodnik', 11300000.00),
 (30, 'nauczyciel', 6500.00),
 (40, 'kierowca testowy', 80000.00),
-(50, 'specjalista ds. bezpieczenstwa IT' 10000.00);
+(50, 'specjalista ds. bezp. IT', 10000.00);
 
 INSERT INTO ksiegowosc.premia (id_premii, rodzaj, kwota) VALUES
-(1, 'Pole Position' 200000.00),
+(1, 'Pole Position', 200000.00),
 (2, 'Zawodnik Miesiaca', 400000.00),
-(3, 'Dzialalnosc pozaszkolna' 5000000.00),
+(3, 'Dzialalnosc pozaszkolna', 5000000.00),
 (4, 'Udzial w wyscigu', 100000.00),
 (5, 'Premia swiateczna', 2000.00);
 
@@ -140,7 +140,7 @@ WHERE SUBSTRING(nazwisko, 1, 1) = 'J';
 
 /*e*/
 SELECT * FROM ksiegowosc.pracownicy
-WHERE nazwisko LIKE '%' || 'n' || '%' 
+WHERE LOWER (nazwisko) LIKE '%n%' 
 AND RIGHT(imie, 1) = 'a';
 
 /*f*/
@@ -168,7 +168,7 @@ FROM ksiegowosc.wynagrodzenie
 WHERE wynagrodzenie.id_premii IS NULL AND wyn_god.liczba_godzin - 160 > 0;
 
 /*i*/
-SELECT wyn_pra.imie, wyn_pra.nazwisko 
+SELECT wyn_pra.*
 FROM ksiegowosc.wynagrodzenie
 	JOIN ksiegowosc.pracownicy AS wyn_pra 
 	ON wyn_pra.id_pracownika = wynagrodzenie.id_pracownika
@@ -187,12 +187,48 @@ FROM ksiegowosc.wynagrodzenie
 	ON wyn_pre.id_premii = wynagrodzenie.id_premii
 ORDER BY wyn_pen.kwota DESC, wyn_pre.kwota DESC;
 
+/*k*/
+SELECT wyn_pen.stanowisko, COUNT (wyn_pra.id_pracownika) AS liczba
+FROM ksiegowosc.wynagrodzenie
+	JOIN ksiegowosc.pracownicy AS wyn_pra 
+	ON wyn_pra.id_pracownika = wynagrodzenie.id_pracownika
+	JOIN ksiegowosc.pensja AS wyn_pen
+	ON wyn_pen.id_pensji = wynagrodzenie.id_pensji
+GROUP BY (wyn_pen.stanowisko);
 
+/*l*/
+SELECT 
+	wyn_pen.stanowisko, 
+	ROUND (AVG (wyn_pen.kwota::NUMERIC), 2) AS srednia,
+	MIN (ROUND(wyn_pen.kwota::NUMERIC, 2)) AS min,
+	MAX (ROUND(wyn_pen.kwota::NUMERIC, 2)) AS maks
+FROM ksiegowosc.wynagrodzenie
+	JOIN ksiegowosc.pracownicy AS wyn_pra 
+	ON wyn_pra.id_pracownika = wynagrodzenie.id_pracownika
+	JOIN ksiegowosc.pensja AS wyn_pen
+	ON wyn_pen.id_pensji = wynagrodzenie.id_pensji
+GROUP BY (wyn_pen.stanowisko) HAVING (wyn_pen.stanowisko='kierownik');
 
+/*m*/
+SELECT SUM (kwota) FROM ksiegowosc.pensja;
 
+/*n*/
+SELECT stanowisko, SUM (kwota) FROM ksiegowosc.pensja GROUP BY stanowisko;
 
+/*o*/
+SELECT 
+	wyn_pen.stanowisko, 
+	COUNT(wyn_pre.id_premii)
+FROM ksiegowosc.wynagrodzenie
+	JOIN ksiegowosc.premia AS wyn_pre 
+	ON wyn_pre.id_premii = wynagrodzenie.id_premii
+	JOIN ksiegowosc.pensja AS wyn_pen
+	ON wyn_pen.id_pensji = wynagrodzenie.id_pensji
+GROUP BY (wyn_pen.stanowisko);
 
-
-	
-
-
+/*p*/
+DELETE FROM ksiegowosc.pracownicy 
+USING ksiegowosc.wynagrodzenie, ksiegowosc.pensja
+WHERE CAST(pensja.kwota AS numeric) < 1200
+AND wynagrodzenie.id_pracownika = pracownicy.id_pracownika;
+AND wynagrodzenie.id_pensji = pensja.id_pensji;
