@@ -1,12 +1,5 @@
 /*1*/
-CREATE DATABASE firma
-    WITH 
-    OWNER = postgres
-    ENCODING = 'UTF8'
-    LC_COLLATE = 'Polish_Poland.1250'
-    LC_CTYPE = 'Polish_Poland.1250'
-    TABLESPACE = pg_default
-    CONNECTION LIMIT = -1;
+CREATE DATABASE firma;
 
 /*2*/
 CREATE SCHEMA ksiegowosc
@@ -21,7 +14,7 @@ CREATE TABLE ksiegowosc.pracownicy
     adres character varying(200) NOT NULL,
     telefon character varying(30) NOT NULL,
     CONSTRAINT pracownicy_pkey PRIMARY KEY (id_pracownika)
-)
+);
 	
 CREATE TABLE ksiegowosc.godziny
 (
@@ -34,7 +27,7 @@ CREATE TABLE ksiegowosc.godziny
         REFERENCES ksiegowosc.pracownicy (id_pracownika) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
-)
+);
 	
 CREATE TABLE ksiegowosc.pensja
 (
@@ -42,7 +35,7 @@ CREATE TABLE ksiegowosc.pensja
     stanowisko character varying(30) NOT NULL,
     kwota money NOT NULL,
     CONSTRAINT pensja_pkey PRIMARY KEY (id_pensji)
-)
+);
 	
 CREATE TABLE ksiegowosc.premia
 (
@@ -50,7 +43,7 @@ CREATE TABLE ksiegowosc.premia
     rodzaj character varying(200) NOT NULL,
     kwota money NOT NULL,
     CONSTRAINT premia_pkey PRIMARY KEY (id_premii)
-)
+);
 	
 CREATE TABLE ksiegowosc.wynagrodzenie
 (
@@ -77,7 +70,7 @@ CREATE TABLE ksiegowosc.wynagrodzenie
         REFERENCES ksiegowosc.premia (id_premii) MATCH SIMPLE
         ON UPDATE CASCADE
         ON DELETE CASCADE
-)
+);
 
 /*5*/
 INSERT INTO ksiegowosc.pracownicy (id_pracownika, imie, nazwisko, adres, telefon) VALUES
@@ -197,6 +190,13 @@ FROM ksiegowosc.wynagrodzenie
 GROUP BY (wyn_pen.stanowisko);
 
 /*l*/
+SELECT 
+	ROUND (AVG (wyn_pen.kwota::NUMERIC), 2) AS srednia,
+	MIN (ROUND(wyn_pen.kwota::NUMERIC, 2)) AS min,
+	MAX (ROUND(wyn_pen.kwota::NUMERIC, 2)) AS maks
+FROM ksiegowosc.pensja;
+WHERE stanowisko = 'kierownik';
+
 SELECT 
 	wyn_pen.stanowisko, 
 	ROUND (AVG (wyn_pen.kwota::NUMERIC), 2) AS srednia,
