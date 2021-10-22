@@ -11,7 +11,7 @@ CREATE TABLE public.buildings
     geometry geometry NOT NULL,
     name character varying(20) NOT NULL,
     CONSTRAINT buildings_pkey PRIMARY KEY (id)
-)
+);
 
 CREATE TABLE public.roads
 (
@@ -19,7 +19,7 @@ CREATE TABLE public.roads
     geometry geometry NOT NULL,
     name character varying(20) NOT NULL,
     CONSTRAINT roads_pkey PRIMARY KEY (id)
-)
+);
 
 CREATE TABLE public.poi
 (
@@ -27,7 +27,7 @@ CREATE TABLE public.poi
     geometry geometry NOT NULL,
     name character varying(20) NOT NULL,
     CONSTRAINT roads_pkey PRIMARY KEY (id)
-)
+);
 
 /*5*/
 INSERT INTO buildings VALUES('1', ST_GeomFromText('POLYGON((8 4, 10.5 4, 10.5 1.5, 8 1.5, 8 4))'), 'BuildingA');
@@ -64,7 +64,7 @@ SELECT ST_DISTANCE(geometry, POINT(1, 3.5)::geometry) FROM buildings WHERE name=
 /*f*/
 SELECT (SELECT ST_Area(geometry) FROM buildings WHERE  name = 'BuildingC') - (SELECT ST_Area(ST_Intersection(ST_Buffer(geometry , 0.5), (SELECT geometry FROM buildings WHERE name = 'BuildingC')))
 FROM buildings
-WHERE name = 'BuildingB')
+WHERE name = 'BuildingB');
 
 /*g*/
 SELECT * FROM buildings WHERE 
@@ -73,4 +73,5 @@ ST_Y(ST_CENTROID(geometry)) > (SELECT ST_Y(ST_POINTN(geometry, 1)) FROM roads WH
 /*h*/
 SELECT ST_AREA(geometry) + ST_AREA('POLYGON((4 7, 6 7, 6 8, 4 8, 4 7))') - 2 * ST_AREA(ST_INTERSECTION (geometry, 'POLYGON((4 7, 6 7, 6 8, 4 8, 4 7))'))
 FROM buildings
-WHERE name='BuildingC'		
+WHERE name='BuildingC';
+
