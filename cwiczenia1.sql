@@ -2,8 +2,7 @@
 CREATE DATABASE firma;
 
 /*2*/
-CREATE SCHEMA ksiegowosc
-    AUTHORIZATION postgres;
+CREATE SCHEMA ksiegowosc;
 
 /*4*/
 CREATE TABLE ksiegowosc.pracownicy
@@ -32,7 +31,7 @@ CREATE TABLE ksiegowosc.godziny
 CREATE TABLE ksiegowosc.pensja
 (
     id_pensji integer NOT NULL,
-    stanowisko character varying(30) NOT NULL,
+    stanowisko character varying(100) NOT NULL,
     kwota money NOT NULL,
     CONSTRAINT pensja_pkey PRIMARY KEY (id_pensji)
 );
