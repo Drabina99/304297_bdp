@@ -39,7 +39,7 @@ update obiekty set geom=st_buildarea(st_curvetoline('multicurve(
 /*4*/
 insert into obiekty
 values(7, 'obiekt7', st_collect((select geom from obiekty where nazwa='obiekt3'), 
-							  (select geom from obiekty where nazwa='obiekt4')));
+				(select geom from obiekty where nazwa='obiekt4')));
 							  
 /*5*/
 select sum(st_area(st_buffer(geom, 5))) from obiekty where st_hasarc(geom)=false;
