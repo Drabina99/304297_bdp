@@ -37,7 +37,7 @@ update obiekty set geom=st_buildarea(st_curvetoline('multicurve(
 	linestring(20.5 19.5, 20 20))')) where id=4;
 	
 /*4*/
-insert into
+insert into obiekty
 values(7, 'obiekt7', st_collect((select geom from obiekty where nazwa='obiekt3'), 
 							  (select geom from obiekty where nazwa='obiekt4')));
 							  
